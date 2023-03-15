@@ -17,3 +17,8 @@ services:
       - ./src/logs:/var/www/logs
     environment:
       docker: 'true'
+
+  composer:
+    image: composer:latest
+    volumes:
+      - ./src:/app
