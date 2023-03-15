@@ -24,9 +24,12 @@ docker-compose run --service-ports frontend
 
 You should be able to access the API in [your web browser](http://localhost:8080/).
 
+The rfid lookup endpoint is [here](http://localhost:8080/auth/fetch?cn=UID_HERE).
+
 ## Testing
 
-For testing, PHPUnit is used. Run the tests using:
+~~For testing, PHPUnit is used. Run the tests using:~~
+_Didn't have time to finish this, please see [TESTS.md](/TESTS.md)._
 
 ```sh
 docker-compose run --rm composer test
