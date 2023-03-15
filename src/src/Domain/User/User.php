@@ -1,57 +1,75 @@
 <?php
-
 declare(strict_types=1);
 
 namespace App\Domain\User;
 
-use JsonSerializable;
-
-class User implements JsonSerializable
-{
-    private ?int $id;
-
-    private string $username;
-
-    private string $firstName;
-
-    private string $lastName;
-
-    public function __construct(?int $id, string $username, string $firstName, string $lastName)
+class User {
+    public function __construct(
+        protected \mysqli $db,
+        protected int $id)
     {
-        $this->id = $id;
-        $this->username = strtolower($username);
-        $this->firstName = ucfirst($firstName);
-        $this->lastName = ucfirst($lastName);
     }
 
-    public function getId(): ?int
+    public function getData()
     {
-        return $this->id;
+        $stmt = $this->db->prepare(
+        'SELECT `id`, `first_name`, `last_name`, `card_number`
+        FROM `employees`
+        WHERE `id` = ?');
+
+        $stmt->bind_param('i', $this->id);
+        $stmt->execute();
+
+        if(!$result = $stmt->get_result())
+        {
+            // failure, we'll need to handle this somehow AND it would
+            // be a good idea to log it somewhere safe.
+            throw new Exception("Database error.");
+        }
+
+        if(!$data = $result->fetch_assoc())
+        {
+            throw new Exception("no data returned for ID.");
+        }
+
+        $result->free();
+        return (object) $data;
     }
 
-    public function getUsername(): string
+    public function getDepartments()
     {
-        return $this->username;
-    }
+        $stmt = $this->db->prepare(
+        'SELECT `departments`.`name`
+        FROM `employees_departments`
+        LEFT JOIN `departments` ON `employees_departments`.`department_id` = `departments`.`id`
+        WHERE `employees_departments`.`employee_id` = ?');
 
-    public function getFirstName(): string
-    {
-        return $this->firstName;
-    }
+        $stmt->bind_param('i', $this->id);
+        $stmt->execute();
 
-    public function getLastName(): string
-    {
-        return $this->lastName;
-    }
+        if(!$result = $stmt->get_result())
+        {
+            // failure, we'll need to handle this somehow AND it would
+            // be a good idea to log it somewhere safe.
+            throw new Exception("Database error.");
+        }
 
-    #[\ReturnTypeWillChange]
-    public function jsonSerialize(): array
-    {
-        return [
-            'id' => $this->id,
-            'username' => $this->username,
-            'firstName' => $this->firstName,
-            'lastName' => $this->lastName,
-        ];
+        // return departments as a list of names
+        $departments = $result->fetch_all(MYSQLI_ASSOC);
+
+        $result->free();
+
+        // wrap around the results object and just give us a simple list
+        // of departments with no mysql nonsense
+        // we also handle cases when employees don't have at least one
+        // department assigned
+        if(isset($departments[0]))
+        {
+            return array_map(fn($row): string => $row['name'], $departments);
+        }
+
+        // empty
+        return array();
     }
 }
+?>

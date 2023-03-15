@@ -9,15 +9,21 @@ services:
     depends_on:
       - php
       - mysql
+    networks:
+      - sgnlnet
 
   php:
-    image: php:8-fpm-alpine3.17
+    build:
+      context: .
+      dockerfile: ./docker/php/Dockerfile
     volumes:
       - ./src:/var/www/html/
       - ./docker/php/php.ini:/usr/local/etc/php/php.ini
       - ./src/logs:/var/www/logs
     env_file:
       - ./docker/vars.env
+    networks:
+      - sgnlnet
 
   composer:
     image: composer:latest

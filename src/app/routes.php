@@ -2,8 +2,10 @@
 
 declare(strict_types=1);
 
-use App\Application\Actions\User\ListUsersAction;
-use App\Application\Actions\User\ViewUserAction;
+/* use App\Application\Actions\User\ListUsersAction;
+use App\Application\Actions\User\ViewUserAction; */
+use App\Application\Actions\RFID\FetchRFIDAction;
+
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\App;
@@ -15,7 +17,17 @@ return function (App $app) {
         return $response;
     });
 
-    $app->get('/', function (Request $request, Response $response) {
+    $app->group('/auth', function (Group $group) {
+        $group->get('', function (Request $request, Response $response) {
+            $response->getBody()->write('Hello world! API microservice.');
+            return $response;
+        });
+    
+        $group->get('/fetch', FetchRFIDAction::class);
+    });
+
+    // old scaffolding
+    /* $app->get('/', function (Request $request, Response $response) {
         $response->getBody()->write('Hello world! YEAH!!!');
         return $response;
     });
@@ -23,5 +35,5 @@ return function (App $app) {
     $app->group('/users', function (Group $group) {
         $group->get('', ListUsersAction::class);
         $group->get('/{id}', ViewUserAction::class);
-    });
+    });*/
 };

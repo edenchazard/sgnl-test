@@ -26,5 +26,20 @@ return function (ContainerBuilder $containerBuilder) {
 
             return $logger;
         },
+/*
+        DB::class => function (ContainerInterface $c) {
+            $settings = $c->get(SettingsInterface::class);
+
+            $dbSettings = $settings->get('db');
+
+            $host = $dbSettings['host'];
+            $dbname = $dbSettings['database'];
+            $username = $dbSettings['username'];
+            $password = $dbSettings['password'];
+
+            $db = new DB($host, $username, $password, $dbname);
+            $db->connect();
+            return $db;
+        },*/
     ]);
 };

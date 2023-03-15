@@ -70,17 +70,22 @@ abstract class Action
         return $this->args[$name];
     }
 
+    /*
+    I would personally have left these, but the technical test wants the json
+    in a *specific* structure, and the original method adds extra stuff
+    such as status code and a data wrapper.
+    */
     /**
      * @param array|object|null $data
      */
-    protected function respondWithData($data = null, int $statusCode = 200): Response
+    protected function respondWithDataOld($data = null, int $statusCode = 200): Response
     {
         $payload = new ActionPayload($statusCode, $data);
 
-        return $this->respond($payload);
+        return $this->respondOld($payload);
     }
 
-    protected function respond(ActionPayload $payload): Response
+    protected function respondOld(ActionPayload $payload): Response
     {
         $json = json_encode($payload, JSON_PRETTY_PRINT);
         $this->response->getBody()->write($json);
@@ -89,4 +94,14 @@ abstract class Action
                     ->withHeader('Content-Type', 'application/json')
                     ->withStatus($payload->getStatusCode());
     }
+
+    protected function respondWithData(mixed $payload, $statusCode = 200): Response
+    {
+        $json = json_encode($payload, JSON_PRETTY_PRINT);
+        $this->response->getBody()->write($json);
+
+        return $this->response
+                    ->withHeader('Content-Type', 'application/json')
+                    ->withStatus($statusCode);
+    }    
 }
